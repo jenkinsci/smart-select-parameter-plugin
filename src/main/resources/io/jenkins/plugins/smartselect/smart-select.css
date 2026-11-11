@@ -41,21 +41,30 @@
   background: var(--background--hover, rgba(100,116,139,.1));
 }
 .smart-select-indicator {
-  width: 15px; height: 15px; flex: none; box-sizing: border-box;
-  border: 0; border-radius: 4px; background: var(--input-color, #fff); box-shadow: var(--form-input-glow, 0 0 0 0 transparent), inset 0 0 0 2px var(--input-border, #94a3b8);
+  width: 22px; height: 22px; flex: none; box-sizing: border-box;
+  border: 0; border-radius: 6px; background: var(--input-color, #fff);
+  box-shadow: var(--form-input-glow, 0 0 0 8px transparent), inset 0 0 0 var(--jenkins-border-width, 2px) var(--input-border, #94a3b8);
   position: relative;
 }
-.smart-select-parameter[data-mode='SINGLE'] .smart-select-indicator { border-radius: 100%; }
+.smart-select-parameter[data-mode='SINGLE'] .smart-select-indicator {
+  border-radius: 50%;
+  box-shadow: 0 0 0 .5rem transparent, inset 0 0 0 1.5px var(--input-border, #94a3b8);
+}
+.smart-select-option:not(.is-selected):hover .smart-select-indicator {
+  box-shadow: var(--form-input-glow, 0 0 0 8px transparent), inset 0 0 0 5px var(--input-border-hover, var(--input-border, #94a3b8));
+}
 .smart-select-option.is-selected .smart-select-indicator {
-  background: var(--focus-input-border, #2563eb); box-shadow: var(--form-input-glow, 0 0 0 0 transparent), inset 0 0 0 12px var(--focus-input-border, #2563eb);
+  box-shadow: var(--form-input-glow, 0 0 0 8px transparent), inset 0 0 0 12px var(--focus-input-border, #2563eb);
+}
+.smart-select-parameter[data-mode='SINGLE'] .smart-select-option.is-selected .smart-select-indicator {
+  box-shadow: 0 0 0 .5rem transparent, inset 0 0 0 .4rem var(--focus-input-border, #2563eb);
 }
 .smart-select-option.is-selected .smart-select-indicator::after {
-  content: ''; position: absolute; left: 4.5px; top: 3px; width: 4px; height: 7px;
-  border: solid var(--white, #fff); border-width: 0 2px 2px 0; transform: rotate(45deg);
+  content: ''; position: absolute; left: 50%; top: 50%; width: 5px; height: 9px;
+  border: solid var(--background, #fff); border-width: 0 2px 2px 0; transform: translate(-50%, -60%) rotate(45deg);
 }
 .smart-select-parameter[data-mode='SINGLE'] .smart-select-option.is-selected .smart-select-indicator::after {
-  width: 5px; height: 5px; top: 5px; left: 5px; background: var(--white, #fff);
-  border: 0; border-radius: 50%; transform: none;
+  content: none;
 }
 .smart-select-label { overflow-wrap: anywhere; }
 .smart-select-empty { padding: 17px; text-align: center; color: var(--text-color-secondary, #64748b); }
