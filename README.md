@@ -2,7 +2,7 @@
 
 Compact searchable single- and multi-select Jenkins build parameters with optional REST data sources and validated cascading selections. No additional runtime plugin or third-party JavaScript library is required.
 
-**Unreleased publication candidate: 1.0.2-SNAPSHOT.** This source repository is public with the maintainer's authorization. Official Jenkins hosting and the first update-center release remain pending; a public source repository is not itself an approved plugin release.
+**Jenkins hosting is approved.** The first update-center release is pending.
 
 [Hosting application #5409](https://github.com/jenkins-infra/repository-permissions-updater/issues/5409): hosting approved.
 

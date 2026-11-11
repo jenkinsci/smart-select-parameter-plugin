@@ -52,20 +52,27 @@ class PublicationCheckTest(unittest.TestCase):
     def test_source_allowlist_excludes_outputs_and_private_files(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory).resolve()
-            for name in ("pom.xml", "README.md", "src/main/java/Sample.java",
+            for name in ("pom.xml", "README.md", "src/main/java/Sample.java", ".mvn/extensions.xml",
                          ".env", "target/app.hpi", "output/private.log",
                          "src/main/resources/secret.key", ".git/config"):
                 file = root / name
                 file.parent.mkdir(parents=True, exist_ok=True)
                 file.write_text("sample", encoding="utf-8")
             files = {p.relative_to(root).as_posix() for p in checker.source_files(root)}
-            self.assertEqual({"pom.xml", "README.md", "src/main/java/Sample.java"}, files)
+            self.assertEqual({"pom.xml", "README.md", "src/main/java/Sample.java", ".mvn/extensions.xml"}, files)
 
     def test_path_outside_root_is_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory).resolve()
             with self.assertRaises(ValueError):
                 checker.safe_relative(root.parent / "outside.txt", root)
+
+    def test_approved_cd_template_allows_its_required_write_permission(self):
+        path = Path(".github/workflows/cd.yaml")
+        template = (ROOT / path).read_text(encoding="utf-8")
+        self.assertTrue(checker.approved_cd_workflow(path, template))
+        self.assertFalse(checker.approved_cd_workflow(path, template + "\n  injected: true\n"))
+        self.assertFalse(checker.approved_cd_workflow(Path(".github/workflows/other.yaml"), template))
 
     def test_release_gate_does_not_claim_missing_accounts_or_approval(self):
         issues = checker.release_issues({
