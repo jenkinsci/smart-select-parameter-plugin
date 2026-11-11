@@ -1,6 +1,6 @@
 /* Neutral, compact styling; intentionally inherits Jenkins fonts and theme colors. */
 .smart-select-parameter { width: 100%; min-width: 0; }
-.smart-select-widget { position: relative; font: inherit; }
+.smart-select-widget { position: relative; font: inherit; width: 240px; max-width: min(100%, calc(100vw - 32px)); }
 .smart-select-widget button { font: inherit; cursor: pointer; }
 .smart-select-trigger { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left; }
 .smart-select-trigger:focus-visible, .smart-select-option:focus-visible,
@@ -18,7 +18,7 @@
 .smart-select-search-wrap { padding: 10px 10px 8px; }
 .smart-select-search { width: 100%; box-sizing: border-box; }
 .smart-select-toolbar {
-  display: flex; align-items: center; justify-content: space-between;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
   gap: 8px; padding: 4px 12px 9px; border-bottom: 1px solid var(--medium-grey, #e5e7eb);
   color: var(--text-color-secondary, #64748b); font-size: 12px;
 }
@@ -74,6 +74,6 @@
 .smart-select-trigger:disabled { opacity: .65; cursor: wait; }
 .smart-select-parameter[data-state='error'] .smart-select-trigger:disabled,
 .smart-select-parameter[data-state='waiting'] .smart-select-trigger:disabled { cursor: not-allowed; }
-.smart-select-pagination { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px; border-top: 1px solid var(--input-border, #d5dbe3); font-size: 12px; }
+.smart-select-pagination { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 8px; border-top: 1px solid var(--input-border, #d5dbe3); font-size: 12px; }
 .smart-select-pagination button { border: 0; border-radius: 4px; padding: 5px 8px; background: var(--background--hover, #f1f5f9); color: inherit; }
 .smart-select-pagination button:disabled { opacity: .45; cursor: default; }
