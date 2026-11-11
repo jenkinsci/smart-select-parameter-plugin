@@ -2,9 +2,9 @@
 
 Compact searchable single- and multi-select Jenkins build parameters with optional REST data sources and validated cascading selections. No additional runtime plugin or third-party JavaScript library is required.
 
-**Unreleased publication candidate: 1.0.2-SNAPSHOT.** This source repository is public with the maintainer's authorization. Official Jenkins hosting and the first update-center release remain pending; a public source repository is not itself an approved plugin release.
+**Jenkins hosting is approved.** The first update-center release is pending.
 
-[Hosting application #5409](https://github.com/jenkins-infra/repository-permissions-updater/issues/5409): automated hosting checks complete; human review pending.
+[Hosting application #5409](https://github.com/jenkins-infra/repository-permissions-updater/issues/5409): hosting approved.
 
 [中文说明](README.zh-CN.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [Publication checklist](publishing/README.md)
 
@@ -25,7 +25,7 @@ The complete UI defaults to English, including configuration, build controls, va
 
 Build prerequisites and local development instructions are in the [development guide](docs/development.md). Once an official release is available, the plugin site will show compatibility requirements for each version. Pipeline components are test dependencies only; a controller running a Pipeline example needs Pipeline installed.
 
-Validate the source with `mvn -B -ntp clean verify`. Official update-center availability is pending hosting and a first release.
+Validate the source with `mvn -B -ntp clean verify`. Official update-center availability is pending the first release.
 
 Add **Smart Select Parameter** to a parameterized job. Existing plain choices configurations remain supported. Back up the previous plugin and job configurations before upgrading; a downgrade may also need old configurations restored.
 

@@ -10,7 +10,7 @@
 
   <groupId>io.jenkins.plugins</groupId>
   <artifactId>smart-select-parameter</artifactId>
-  <version>1.0.2-SNAPSHOT</version>
+  <version>${revision}.${changelist}</version>
   <packaging>hpi</packaging>
   <name>Smart Select Parameter</name>
   <description>Searchable single and multi-select build parameters without additional UI dependencies.</description>
@@ -36,6 +36,8 @@
     <url>https://github.com/${github.repository}/actions</url>
   </ciManagement>
   <properties>
+    <revision>1</revision>
+    <changelist>999999-SNAPSHOT</changelist>
     <jenkins.baseline>2.555</jenkins.baseline>
     <jenkins.version>${jenkins.baseline}.3</jenkins.version>
     <hpi.strictBundledArtifacts>true</hpi.strictBundledArtifacts>
@@ -44,8 +46,7 @@
     <ban-junit4-imports.skip>false</ban-junit4-imports.skip>
     <banObsoleteDependencyOverrides.skip>false</banObsoleteDependencyOverrides.skip>
     <spotless.check.skip>false</spotless.check.skip>
-    <!-- Public source; official Jenkins hosting remains pending. -->
-    <github.repository>jaychang1989/smart-select-parameter-plugin</github.repository>
+    <github.repository>jenkinsci/smart-select-parameter-plugin</github.repository>
   </properties>
   <dependencyManagement>
     <dependencies>

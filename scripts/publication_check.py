@@ -1,5 +1,6 @@
 """Local source-preparation checks, not the official Jenkins hosting checker."""
 import argparse
+import hashlib
 import ipaddress
 import json
 from pathlib import Path
@@ -16,7 +17,7 @@ ROOT_FILES = {
     "CONTRIBUTING.md", "SECURITY.md", "Jenkinsfile", "verify-offline.sh",
     ".gitignore", ".gitattributes",
 }
-PREFIXES = {"src", "examples", "docs", "scripts", "tests", ".github", "publishing"}
+PREFIXES = {"src", "examples", "docs", "scripts", "tests", ".github", ".mvn", "publishing"}
 EXCLUDED = {"target", "dist", "output", ".git", ".idea", ".vscode", ".playwright-cli", "__pycache__"}
 BAD_EXTENSIONS = {".pem", ".key", ".dpapi", ".hpi", ".jpi", ".zip", ".class", ".log", ".pyc"}
 PRIVATE_NAMES = {"credentials.xml", "settings.xml", "secrets.json", "id_rsa", "id_ed25519"}
@@ -116,6 +117,13 @@ def release_issues(settings):
     return result
 
 
+# This is the Jenkins CD workflow template reviewed in the CD onboarding PR.
+# Any change to its content requires an explicit digest update and review.
+def approved_cd_workflow(path, text):
+    return (path.as_posix() == ".github/workflows/cd.yaml"
+            and hashlib.sha256(text.encode("utf-8")).hexdigest() == "590d6bf0ac45fcfa76d73b9ec472e145b7a988402ef1397da42a8377e9c169b0")
+
+
 def inspect_source(root, release=False):
     root = Path(root).resolve()
     errors, warnings = [], []
@@ -157,7 +165,8 @@ def inspect_source(root, release=False):
                     errors.append(issue("unpinned-action", relative))
             if re.search(r"\b(?:mvn|mvnw)\b[^\n]*\bdeploy\b", text):
                 errors.append(issue("active-deployment-workflow", relative))
-            if re.search(r"^\s*contents:\s*write", text, re.MULTILINE):
+            if (re.search(r"^\s*contents:\s*write", text, re.MULTILINE)
+                    and not approved_cd_workflow(relative, text)):
                 errors.append(issue("active-write-permission", relative))
     try:
         pom = ET.parse(root / "pom.xml").getroot()
