@@ -2,7 +2,7 @@
 
 Compact searchable single- and multi-select Jenkins build parameters with optional REST data sources and validated cascading selections. No additional runtime plugin or third-party JavaScript library is required.
 
-**Jenkins hosting is approved.** The first update-center release is pending.
+**Jenkins hosting is approved.** The plugin is published in the Jenkins update center and can be installed from the Jenkins plugin manager.
 
 [Hosting application #5409](https://github.com/jenkins-infra/repository-permissions-updater/issues/5409): hosting approved.
 
@@ -23,11 +23,11 @@ The complete UI defaults to English, including configuration, build controls, va
 
 ## Usage and development
 
-Build prerequisites and local development instructions are in the [development guide](docs/development.md). Once an official release is available, the plugin site will show compatibility requirements for each version. Pipeline components are test dependencies only; a controller running a Pipeline example needs Pipeline installed.
+Build prerequisites and local development instructions are in the [development guide](docs/development.md). The plugin site shows compatibility requirements for each released version. Pipeline components are test dependencies only; a controller running a Pipeline example needs Pipeline installed.
 
-Validate the source with `mvn -B -ntp clean verify`. Official update-center availability is pending the first release.
+Validate the source with `mvn -B -ntp clean verify`.
 
-Add **Smart Select Parameter** to a parameterized job. Existing plain choices configurations remain supported. Back up the previous plugin and job configurations before upgrading; a downgrade may also need old configurations restored.
+Install **Smart Select Parameter** from the Jenkins plugin manager, then add it to a parameterized job. Existing plain choices configurations remain supported. Back up the previous plugin and job configurations before upgrading; a downgrade may also need old configurations restored.
 
 ## Static choices and labels
 
@@ -140,8 +140,8 @@ python scripts/publication_check.py
 python -m unittest discover -s tests -v
 ```
 
-[Testing notes](docs/testing.md) · [Changelog](CHANGELOG.md). Configured remote CI does not mean those jobs have run before the source is public.
+[Testing notes](docs/testing.md) · [Changelog](CHANGELOG.md).
 
 ## License
 
-[MIT](LICENSE). The owner must confirm copyright and permission to publish before making this source public.
+[MIT](LICENSE).
