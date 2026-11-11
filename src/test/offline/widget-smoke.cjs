@@ -44,6 +44,7 @@ function makeWidget(mode, defaults, values) {
   const el = new FakeElement();
   el.dataset.mode = mode;
   const value = new FakeElement(defaults);
+  const control = new FakeElement();
   const trigger = new FakeElement();
   const popup = new FakeElement(); popup.hidden = true;
   const summary = new FakeElement();
@@ -68,6 +69,7 @@ function makeWidget(mode, defaults, values) {
     return option;
   });
   const elements = {
+    '.smart-select-widget': control,
     '.smart-select-options': container,
     '.smart-select-pagination': pagination,
     '.smart-select-previous': previous,
@@ -88,7 +90,7 @@ function makeWidget(mode, defaults, values) {
   el.querySelectorAll = (selector) => selector === '.smart-select-option' ? options : [];
   el.allChildren = [...Object.values(elements), ...options];
   container.children = options.slice();
-  return { el, value, trigger, popup, search, count, empty, options, selectAll, clear, summary, container, pagination, previous, next, pageInfo };
+  return { el, control, value, trigger, popup, search, count, empty, options, selectAll, clear, summary, container, pagination, previous, next, pageInfo };
 }
 
 const multi = makeWidget('MULTI', 'price,vehicle', ['admin', 'price', 'vehicle', 'job']);
@@ -96,6 +98,7 @@ const single = makeWidget('SINGLE', 'pre', ['dev', 'pre', 'release']);
 const labeled = makeWidget('MULTI', 'price', [{ value: 'price', label: '报价服务' }, { value: 'admin', label: '管理服务' }]);
 const large = makeWidget('MULTI', '', Array.from({length: 2000}, (_, i) => `service-${i}`));
 const wide = makeWidget('MULTI', '', ['short', 'a'.repeat(90)]);
+const summaryWide = makeWidget('MULTI', '', ['abcdefghijklmno', 'pqrstuvwxyzabcd']);
 const noSearch = makeWidget('SINGLE', 'dev', ['dev', 'release']);
 const partial = makeWidget('MULTI', '', ['alpha', 'beta']);
 let partialComplete = false;
@@ -107,7 +110,7 @@ noSearch.el.querySelector = selector => selector === '.smart-select-search' ? nu
 const document = {
   readyState: 'complete',
   body: {},
-  querySelectorAll: (selector) => selector === '.smart-select-parameter' ? [multi.el, single.el, labeled.el, large.el, noSearch.el, partial.el, wide.el] : [],
+  querySelectorAll: (selector) => selector === '.smart-select-parameter' ? [multi.el, single.el, labeled.el, large.el, noSearch.el, partial.el, wide.el, summaryWide.el] : [],
   createElement: tag => tag === 'canvas' ? { getContext: () => ({ measureText: text => ({ width: text.length * 10 }) }) } : new FakeElement(),
   addEventListener: () => {}
 };
@@ -124,6 +127,10 @@ assert.notEqual(partial.el.dataset.smartSelectReady, 'true', 'An incomplete widg
 partialComplete = true;
 observerCallback([{target: partial.el, addedNodes: [partial.empty]}]);
 assert.equal(partial.el.dataset.smartSelectReady, 'true', 'A completed fragment should initialize when children arrive');
+assert.ok(parseFloat(wide.control.style.width) > parseFloat(multi.control.style.width), 'Longer options should produce a wider control');
+const initialSummaryWidth = parseFloat(summaryWide.control.style.width);
+summaryWide.options[0].click(); summaryWide.options[1].click();
+assert.ok(parseFloat(summaryWide.control.style.width) > initialSummaryWidth, 'A long selected summary should fit in the control');
 partial.options[0].click();
 assert.equal(partial.value.value, 'alpha', 'An asynchronously completed widget must accept selections');
 

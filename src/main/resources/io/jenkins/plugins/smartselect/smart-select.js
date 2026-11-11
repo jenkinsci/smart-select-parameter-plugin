@@ -12,6 +12,7 @@
       (widget.dataset['i18n' + key] || fallback).replace(/\{(\d+)\}/g, (match, index) => args[index] ?? match);
     const multiple = widget.dataset.mode === "MULTI";
     const hidden = widget.querySelector(".smart-select-value");
+    const control = widget.querySelector('.smart-select-widget');
     const trigger = widget.querySelector(".smart-select-trigger");
     const popup = widget.querySelector(".smart-select-popup");
     const summary = widget.querySelector(".smart-select-summary");
@@ -22,7 +23,7 @@
     const refresh = widget.querySelector('.smart-select-refresh');
     const status = widget.querySelector('.smart-select-error');
     // Jenkins may expose a widget while its HTML is still being inserted.
-    if (!hidden || !trigger || !popup || !summary || !empty || !container || !status
+    if (!hidden || !control || !trigger || !popup || !summary || !empty || !container || !status
         || (widget.dataset.remote === 'true' && !refresh)) return;
     widget.dataset.smartSelectReady = "true";
     const pagination = widget.querySelector('.smart-select-pagination');
@@ -60,6 +61,25 @@
     if (initialData) all = JSON.parse(initialData.value).map(makeOption);
     let byValue = new Map(all.map((element) => [element.dataset.value, element]));
     const labelFor = (value) => byValue.get(value)?.querySelector('.smart-select-label')?.textContent || value;
+    let optionWidth = 0;
+    let measurement;
+    try {
+      measurement = document.createElement('canvas').getContext('2d');
+    } catch (_) {
+      // Use the CSS default when text measurement is unavailable.
+    }
+    function measureOptions() {
+      if (!measurement) return;
+      measurement.font = getComputedStyle(trigger).font || '14px sans-serif';
+      optionWidth = all.reduce((longest, option) =>
+        Math.max(longest, measurement.measureText(labelFor(option.dataset.value)).width), 0);
+    }
+    function updateWidth() {
+      if (!measurement) return;
+      const summaryWidth = measurement.measureText(summary.textContent).width;
+      control.style.width = `${Math.ceil(Math.max(240, optionWidth + 88, summaryWidth + 64))}px`;
+    }
+    measureOptions();
     const selected = new Set(
       (hidden.value || "").split(",").map((v) => v.trim()).filter((v) => byValue.has(v))
     );
@@ -118,6 +138,7 @@
       }
       if (count) count.textContent = message('Count', '{0} / {1} selected', values.length, all.length);
       if (parameterName) trigger.setAttribute('aria-label', `${parameterName}: ${summary.textContent}`);
+      updateWidth();
       if (previousValue !== hidden.value) hidden.dispatchEvent(new Event("change", { bubbles: true }));
     }
 
@@ -255,6 +276,7 @@
         next.forEach(bindOption);
         all = next;
         byValue = new Map(all.map(option => [option.dataset.value, option]));
+        measureOptions();
         for (const value of selected) if (!byValue.has(value)) selected.delete(value);
         if (initialSelection && dependencies.length && data.defaultValue) {
           data.defaultValue.split(',').filter(value => byValue.has(value)).forEach(value => selected.add(value));
@@ -347,6 +369,7 @@
 
     controllers.set(widget, { close });
     sync(); filter();
+    document.fonts?.ready.then(() => { measureOptions(); updateWidth(); });
   }
 
   function initAll() {
