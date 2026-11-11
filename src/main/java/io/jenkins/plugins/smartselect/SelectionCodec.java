@@ -18,7 +18,7 @@ public final class SelectionCodec {
 
     private SelectionCodec() {}
 
-    /** Accepts newline-separated textarea values or a Jenkinsfile List<String>. */
+    /** Accepts newline-separated textarea values or a Jenkinsfile {@code List<String>}. */
     public static List<String> choicesFrom(Object input) {
         Collection<?> entries;
         if (input == null) {
