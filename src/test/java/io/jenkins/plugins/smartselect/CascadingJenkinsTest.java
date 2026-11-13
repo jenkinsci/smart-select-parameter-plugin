@@ -291,6 +291,24 @@ public class CascadingJenkinsTest {
     }
 
     @Test
+    void dependentOptionsBranchRejectsMultiSelectParent() throws Exception {
+        SmartSelectParameterDefinition parent = new SmartSelectParameterDefinition("ENV");
+        parent.setMode("MULTI");
+        parent.setChoices(List.of("dev", "prod"));
+
+        SmartSelectParameterDefinition child = new SmartSelectParameterDefinition("SERVICE");
+        child.setMode("SINGLE");
+        child.setDependsOn("ENV");
+        child.setDependentOptions(Map.of("dev", List.of("svc-a")));
+
+        FreeStyleProject project = jenkins.createFreeStyleProject();
+        project.addProperty(new ParametersDefinitionProperty(parent, child));
+
+        assertThrows(
+                IllegalArgumentException.class, () -> child.getOptionsFor(project, Map.of("ENV", "dev")));
+    }
+
+    @Test
     void dependentOptionsBranchAcceptsBuildSubmission() throws Exception {
         SmartSelectParameterDefinition parent = new SmartSelectParameterDefinition("ENV");
         parent.setMode("SINGLE");

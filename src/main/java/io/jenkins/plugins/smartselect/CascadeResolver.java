@@ -47,12 +47,13 @@ final class CascadeResolver {
                             mapProperty == null ? null : mapProperty.getParameterDefinition(name);
                     String value;
                     if (definition instanceof SmartSelectParameterDefinition parent) {
+                        if (parent.isMulti()) throw new IllegalArgumentException(Messages.DependentOptionsMultiParent());
                         List<SelectOption> parentOptions = resolve(parent, job, submitted, path);
                         value = submitted.containsKey(name) ? submitted.get(name) : parent.defaultFor(parentOptions);
                         value = SelectionCodec.join(SelectionCodec.selectedFrom(
                                 value,
                                 parentOptions.stream().map(SelectOption::getValue).toList(),
-                                parent.isMulti()));
+                                false));
                     } else if (definition instanceof SimpleParameterDefinition simple) {
                         ParameterValue checked = submitted.containsKey(name)
                                 ? simple.createValue(submitted.get(name))
