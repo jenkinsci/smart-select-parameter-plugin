@@ -235,7 +235,8 @@ public class CascadingJenkinsTest {
 
         // ENV not submitted → parent default "prod" is used → child gets prod options
         List<SelectOption> options = child.getOptionsFor(project, Map.of());
-        assertEquals(List.of("svc-a"), options.stream().map(SelectOption::getValue).toList());
+        assertEquals(
+                List.of("svc-a"), options.stream().map(SelectOption::getValue).toList());
     }
 
     @Test
@@ -253,11 +254,10 @@ public class CascadingJenkinsTest {
         project.addProperty(new ParametersDefinitionProperty(parent, child));
 
         // "tampered" is not a valid option for ENV → rejected
-        assertThrows(
-                IllegalArgumentException.class, () -> child.getOptionsFor(project, Map.of("ENV", "tampered")));
+        assertThrows(IllegalArgumentException.class, () -> child.getOptionsFor(project, Map.of("ENV", "tampered")));
     }
 
-@Test
+    @Test
     void dependentOptionsBranchSupportsMultiParentKey() throws Exception {
         SmartSelectParameterDefinition env = new SmartSelectParameterDefinition("ENV");
         env.setMode("SINGLE");
@@ -304,8 +304,7 @@ public class CascadingJenkinsTest {
         FreeStyleProject project = jenkins.createFreeStyleProject();
         project.addProperty(new ParametersDefinitionProperty(parent, child));
 
-        assertThrows(
-                IllegalArgumentException.class, () -> child.getOptionsFor(project, Map.of("ENV", "dev")));
+        assertThrows(IllegalArgumentException.class, () -> child.getOptionsFor(project, Map.of("ENV", "dev")));
     }
 
     @Test
