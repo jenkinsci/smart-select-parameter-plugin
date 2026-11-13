@@ -1,0 +1,24 @@
+// Static cascade: dependent parameter uses a Groovy map instead of a REST URL.
+// No REST endpoint or origin authorization needed.
+// ENV selects the environment; SERVICE options change based on the chosen environment.
+pipeline {
+    agent none
+    parameters {
+        smartSelect(name: 'ENV', mode: 'SINGLE', choices: ['dev', 'staging', 'prod'], defaultValues: 'dev')
+        smartSelect(
+            name: 'SERVICE',
+            mode: 'SINGLE',
+            dependsOn: 'ENV',
+            dependentOptions: [
+                dev:     ['service-a', 'service-b', 'service-c'],
+                staging: ['service-a', 'service-b'],
+                prod:    ['service-a']
+            ]
+        )
+    }
+    stages {
+        stage('Read selection') {
+            steps { echo "ENV=${params.ENV}; SERVICE=${params.SERVICE}" }
+        }
+    }
+}

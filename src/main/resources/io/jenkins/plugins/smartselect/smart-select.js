@@ -220,7 +220,7 @@
     }
 
     function reloadOptions(forceRefresh = false) {
-      if (!form || !refresh) return;
+      if (!form) return;
       const sequence = ++requestSequence;
       if (requestController) requestController.abort();
       requestController = new AbortController();

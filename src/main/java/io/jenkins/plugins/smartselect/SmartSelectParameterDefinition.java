@@ -12,6 +12,7 @@ import hudson.util.HttpResponses;
 import hudson.util.Secret;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
@@ -38,6 +39,7 @@ public class SmartSelectParameterDefinition extends ParameterDefinition {
     private Secret restToken;
     private int cacheSeconds = 30;
     private String dependsOn = "";
+    private String dependentOptions = "";
     private transient volatile RestSnapshot restSnapshot;
 
     private record RestSnapshot(String url, List<SelectOption> options, long expiresAt) {}
@@ -65,6 +67,27 @@ public class SmartSelectParameterDefinition extends ParameterDefinition {
 
     public List<String> getDependencies() {
         return getDependsOn().isEmpty() ? List.of() : List.of(getDependsOn().split(","));
+    }
+
+    public String getDependentOptions() {
+        return dependentOptions == null ? "" : dependentOptions;
+    }
+
+    @DataBoundSetter
+    public void setDependentOptions(Object input) {
+        if (input == null || (input instanceof String s && s.isBlank())) {
+            dependentOptions = "";
+            return;
+        }
+        dependentOptions = DependentOptionsCodec.normalize(input);
+    }
+
+    public boolean hasDependentOptions() {
+        return !getDependentOptions().isBlank();
+    }
+
+    Map<String, List<SelectOption>> getParsedDependentOptions() {
+        return DependentOptionsCodec.parse(getDependentOptions());
     }
 
     public List<SelectOption> getOptionsFor(Job<?, ?> job, java.util.Map<String, String> submitted) {
@@ -403,6 +426,7 @@ public class SmartSelectParameterDefinition extends ParameterDefinition {
         copy.setRestToken(getRestToken().getEncryptedValue());
         copy.setCacheSeconds(cacheSeconds);
         copy.setDependsOn(getDependsOn());
+        if (hasDependentOptions()) copy.setDependentOptions(getDependentOptions());
         copy.setDefaultValues(((StringParameterValue) value).getValue());
         return copy;
     }
@@ -420,7 +444,8 @@ public class SmartSelectParameterDefinition extends ParameterDefinition {
                 getRestUrl(),
                 getRestItemsPath(),
                 cacheSeconds,
-                getDependsOn());
+                getDependsOn(),
+                getDependentOptions());
     }
 
     @Override
@@ -440,7 +465,8 @@ public class SmartSelectParameterDefinition extends ParameterDefinition {
                 && Objects.equals(
                         getRestToken().getPlainText(), other.getRestToken().getPlainText())
                 && cacheSeconds == other.cacheSeconds
-                && Objects.equals(getDependsOn(), other.getDependsOn());
+                && Objects.equals(getDependsOn(), other.getDependsOn())
+                && Objects.equals(getDependentOptions(), other.getDependentOptions());
     }
 
     @Extension

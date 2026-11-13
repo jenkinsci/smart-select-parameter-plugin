@@ -24,10 +24,32 @@ final class CascadeResolver {
     private static List<SelectOption> resolve(
             SmartSelectParameterDefinition parameter, Job<?, ?> job, Map<String, String> submitted, Set<String> path) {
         if (parameter.getDependencies().isEmpty()) return parameter.getResolvedOptions();
-        if (job == null || !parameter.isRemote()) throw new IllegalArgumentException(Messages.CascadeContext());
+
+        // Static list: no REST URL and no map — return static choices/options as-is regardless of parent value.
+        if (!parameter.isRemote() && !parameter.hasDependentOptions()) {
+            return parameter.getOptions().isEmpty()
+                    ? parameter.getChoices().stream()
+                            .map(v -> new SelectOption(v, v))
+                            .toList()
+                    : parameter.getOptions();
+        }
+
         if (path.size() >= 16 || !path.add(parameter.getName()))
             throw new IllegalArgumentException(Messages.CascadeCycle());
         try {
+            // Map-based: build lookup key from submitted parent values directly.
+            if (parameter.hasDependentOptions()) {
+                List<String> keyParts = new java.util.ArrayList<>();
+                for (String name : parameter.getDependencies()) {
+                    String value = submitted.getOrDefault(name, "");
+                    if (value.isBlank()) return List.of();
+                    keyParts.add(value);
+                }
+                String key = String.join(",", keyParts);
+                return parameter.getParsedDependentOptions().getOrDefault(key, List.of());
+            }
+
+            if (job == null || !parameter.isRemote()) throw new IllegalArgumentException(Messages.CascadeContext());
             ParametersDefinitionProperty property = job.getProperty(ParametersDefinitionProperty.class);
             String url = parameter.getRestUrl();
             int queryStart = url.indexOf('?');
