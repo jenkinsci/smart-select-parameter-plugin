@@ -37,12 +37,36 @@ final class CascadeResolver {
         if (path.size() >= 16 || !path.add(parameter.getName()))
             throw new IllegalArgumentException(Messages.CascadeCycle());
         try {
-            // Map-based: build lookup key from submitted parent values directly.
+            // Map-based: resolve and validate each parent value, then look up the compound key.
             if (parameter.hasDependentOptions()) {
+                if (job == null) throw new IllegalArgumentException(Messages.CascadeContext());
+                ParametersDefinitionProperty mapProperty = job.getProperty(ParametersDefinitionProperty.class);
                 List<String> keyParts = new java.util.ArrayList<>();
                 for (String name : parameter.getDependencies()) {
-                    String value = submitted.getOrDefault(name, "");
-                    if (value.isBlank()) return List.of();
+                    ParameterDefinition definition =
+                            mapProperty == null ? null : mapProperty.getParameterDefinition(name);
+                    String value;
+                    if (definition instanceof SmartSelectParameterDefinition parent) {
+                        List<SelectOption> parentOptions = resolve(parent, job, submitted, path);
+                        value = submitted.containsKey(name) ? submitted.get(name) : parent.defaultFor(parentOptions);
+                        value = SelectionCodec.join(SelectionCodec.selectedFrom(
+                                value,
+                                parentOptions.stream().map(SelectOption::getValue).toList(),
+                                parent.isMulti()));
+                    } else if (definition instanceof SimpleParameterDefinition simple) {
+                        ParameterValue checked = submitted.containsKey(name)
+                                ? simple.createValue(submitted.get(name))
+                                : simple.getDefaultParameterValue();
+                        if (checked == null || !simple.isValid(checked))
+                            throw new IllegalArgumentException(Messages.ParentInvalid());
+                        if (!(checked.getValue() instanceof String
+                                || checked.getValue() instanceof Boolean
+                                || checked.getValue() instanceof Number))
+                            throw new IllegalArgumentException(Messages.ParentSensitive());
+                        value = String.valueOf(checked.getValue());
+                        if (value.length() > 2048) throw new IllegalArgumentException(Messages.ParentLength());
+                    } else throw new IllegalArgumentException(Messages.ParentMissing());
+                    if (value == null || value.isBlank()) return List.of();
                     keyParts.add(value);
                 }
                 String key = String.join(",", keyParts);

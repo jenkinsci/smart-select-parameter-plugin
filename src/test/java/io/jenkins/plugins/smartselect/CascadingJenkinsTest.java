@@ -217,10 +217,32 @@ public class CascadingJenkinsTest {
     }
 
     @Test
-    void dependentOptionsBranchReturnsEmptyWhenParentValueBlank() throws Exception {
+    void dependentOptionsBranchUsesParentDefaultWhenNotSubmitted() throws Exception {
         SmartSelectParameterDefinition parent = new SmartSelectParameterDefinition("ENV");
         parent.setMode("SINGLE");
-        parent.setChoices(List.of("dev"));
+        parent.setChoices(List.of("dev", "prod"));
+        parent.setDefaultValues("prod");
+
+        SmartSelectParameterDefinition child = new SmartSelectParameterDefinition("SERVICE");
+        child.setMode("SINGLE");
+        child.setDependsOn("ENV");
+        child.setDependentOptions(Map.of(
+                "dev", List.of("svc-a", "svc-b"),
+                "prod", List.of("svc-a")));
+
+        FreeStyleProject project = jenkins.createFreeStyleProject();
+        project.addProperty(new ParametersDefinitionProperty(parent, child));
+
+        // ENV not submitted → parent default "prod" is used → child gets prod options
+        List<SelectOption> options = child.getOptionsFor(project, Map.of());
+        assertEquals(List.of("svc-a"), options.stream().map(SelectOption::getValue).toList());
+    }
+
+    @Test
+    void dependentOptionsBranchRejectsInvalidParentValue() throws Exception {
+        SmartSelectParameterDefinition parent = new SmartSelectParameterDefinition("ENV");
+        parent.setMode("SINGLE");
+        parent.setChoices(List.of("dev", "prod"));
 
         SmartSelectParameterDefinition child = new SmartSelectParameterDefinition("SERVICE");
         child.setMode("SINGLE");
@@ -230,12 +252,12 @@ public class CascadingJenkinsTest {
         FreeStyleProject project = jenkins.createFreeStyleProject();
         project.addProperty(new ParametersDefinitionProperty(parent, child));
 
-        // No submitted value for ENV → blank → empty options
-        List<SelectOption> options = child.getOptionsFor(project, Map.of());
-        assertTrue(options.isEmpty());
+        // "tampered" is not a valid option for ENV → rejected
+        assertThrows(
+                IllegalArgumentException.class, () -> child.getOptionsFor(project, Map.of("ENV", "tampered")));
     }
 
-    @Test
+@Test
     void dependentOptionsBranchSupportsMultiParentKey() throws Exception {
         SmartSelectParameterDefinition env = new SmartSelectParameterDefinition("ENV");
         env.setMode("SINGLE");
