@@ -15,6 +15,9 @@ Each Jenkinsfile is a complete Pipeline. The examples only print selected values
 | [Jenkinsfile-rest](Jenkinsfile-rest) | Environment → services | Same; endpoint accepts `env` | Values allowed for the chosen environment |
 | [Jenkinsfile-two-parents](Jenkinsfile-two-parents) | Environment + region → services | Same; endpoint accepts `env` and `region` | Values allowed for both parents |
 | [Jenkinsfile-cascade](Jenkinsfile-cascade) | Environment → project → services | Same; implement both endpoints | Values allowed for the whole chain |
+| [Jenkinsfile-static-cascade](Jenkinsfile-static-cascade) | Environment → services from a Groovy map | Plugin + Pipeline | `ENV=dev; SERVICE=service-a` |
+| [Jenkinsfile-static-two-parents](Jenkinsfile-static-two-parents) | Environment + region → cluster from a Groovy map | Plugin + Pipeline | `ENV=dev; REGION=us-east; CLUSTER=cluster-dev-use1-a` |
+| [Jenkinsfile-static-labels](Jenkinsfile-static-labels) | Friendly labels with stable values from a Groovy map | Plugin + Pipeline | `ENV=dev; SERVICE=svc-pricing` |
 | [Jenkinsfile](Jenkinsfile) | Original combined static example | Plugin + Pipeline | Used by the existing integration test |
 
 For a new Pipeline job, register parameters by running the selected Jenkinsfile once. Refresh the job page, choose **Build with Parameters**, then submit the desired values. These demonstration scripts do not deploy anything. Remote examples need working endpoints and authorized origins even during registration; dependent parameters have no context-free child defaults. Normal Pipeline side effects still execute on a registration run if you add them yourself.

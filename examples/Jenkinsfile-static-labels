@@ -1,0 +1,30 @@
+// Static cascade with friendly display labels and stable values.
+// Labels are shown to the user; values are what params.SERVICE contains.
+pipeline {
+    agent none
+    parameters {
+        smartSelect(name: 'ENV', mode: 'SINGLE', choices: ['dev', 'prod'], defaultValues: 'dev')
+        smartSelect(
+            name: 'SERVICE',
+            mode: 'SINGLE',
+            dependsOn: 'ENV',
+            dependentOptions: [
+                dev:  [
+                    [value: 'svc-pricing',  label: 'Pricing Service (dev)'],
+                    [value: 'svc-auth',     label: 'Auth Service (dev)'],
+                    [value: 'svc-gateway',  label: 'API Gateway (dev)']
+                ],
+                prod: [
+                    [value: 'svc-pricing',  label: 'Pricing Service'],
+                    [value: 'svc-auth',     label: 'Auth Service']
+                ]
+            ]
+        )
+    }
+    stages {
+        stage('Read selection') {
+            // params.SERVICE contains the value, not the label.
+            steps { echo "ENV=${params.ENV}; SERVICE=${params.SERVICE}" }
+        }
+    }
+}

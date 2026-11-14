@@ -1,0 +1,25 @@
+// Static cascade with two parents: the lookup key is "ENV_value,REGION_value"
+// in the same order as dependsOn. No REST endpoint needed.
+pipeline {
+    agent none
+    parameters {
+        smartSelect(name: 'ENV',    mode: 'SINGLE', choices: ['dev', 'prod'],              defaultValues: 'dev')
+        smartSelect(name: 'REGION', mode: 'SINGLE', choices: ['us-east', 'eu-west'],       defaultValues: 'us-east')
+        smartSelect(
+            name: 'CLUSTER',
+            mode: 'SINGLE',
+            dependsOn: 'ENV,REGION',
+            dependentOptions: [
+                'dev,us-east':  ['cluster-dev-use1-a', 'cluster-dev-use1-b'],
+                'dev,eu-west':  ['cluster-dev-euw1-a'],
+                'prod,us-east': ['cluster-prod-use1-a', 'cluster-prod-use1-b', 'cluster-prod-use1-c'],
+                'prod,eu-west': ['cluster-prod-euw1-a', 'cluster-prod-euw1-b']
+            ]
+        )
+    }
+    stages {
+        stage('Read selection') {
+            steps { echo "ENV=${params.ENV}; REGION=${params.REGION}; CLUSTER=${params.CLUSTER}" }
+        }
+    }
+}

@@ -37,6 +37,9 @@
   <f:entry help="/plugin/smart-select-parameter/help/dependsOn.html" title="${%DependsOn}" description="${%DependsOnHelp}">
     <f:textbox name="parameter.dependsOn" value="${instance.dependsOn}" />
   </f:entry>
+  <f:entry help="/plugin/smart-select-parameter/help/dependentOptions.html" title="${%DependentOptions}" description="${%DependentOptionsHelp}">
+    <f:textarea name="parameter.dependentOptions" value="${instance.dependentOptions}" />
+  </f:entry>
   <f:entry help="/plugin/smart-select-parameter/help/restToken.html" title="${%Token}" description="${%TokenHelp}">
     <f:password name="parameter.restToken" value="${instance.restToken}" />
   </f:entry>
