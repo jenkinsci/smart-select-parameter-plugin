@@ -11,9 +11,11 @@ import hudson.util.FormValidation;
 import hudson.util.HttpResponses;
 import hudson.util.Secret;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.jenkinsci.Symbol;
@@ -326,9 +328,40 @@ public class SmartSelectParameterDefinition extends ParameterDefinition {
         return new StringParameterValue(getName(), getDefaultValueForBuild(), getDescription());
     }
 
+    /**
+     * Values allowed when parent context is unavailable (Pipeline {@code build} step, etc.).
+     * Form/API/CLI still revalidate against the actual parent via {@link #contextualValue}.
+     *
+     * @return allowed values, or {@code null} when REST cascading requires parent context
+     */
+    List<String> contextFreeAllowedValues() {
+        if (getDependencies().isEmpty()) {
+            return allowedValues();
+        }
+        if (hasDependentOptions()) {
+            Set<String> values = new LinkedHashSet<>();
+            for (List<SelectOption> options : getParsedDependentOptions().values()) {
+                for (SelectOption option : options) {
+                    values.add(option.getValue());
+                }
+            }
+            return List.copyOf(values);
+        }
+        if (!isRemote()) {
+            // Static choices/options with dependsOn — same set regardless of parent.
+            return getOptions().isEmpty()
+                    ? getChoices()
+                    : getOptions().stream().map(SelectOption::getValue).toList();
+        }
+        return null;
+    }
+
     public StringParameterValue createValue(String submitted) {
-        if (!getDependencies().isEmpty()) throw new IllegalArgumentException(Messages.ParentsRequired());
-        List<String> values = SelectionCodec.selectedFrom(submitted, allowedValues(), isMulti());
+        List<String> allowed = contextFreeAllowedValues();
+        if (allowed == null) {
+            throw new IllegalArgumentException(Messages.ParentsRequired());
+        }
+        List<String> values = SelectionCodec.selectedFrom(submitted, allowed, isMulti());
         return new StringParameterValue(getName(), SelectionCodec.join(values), getDescription());
     }
 
@@ -400,8 +433,13 @@ public class SmartSelectParameterDefinition extends ParameterDefinition {
         if (!(value instanceof StringParameterValue)) {
             return false;
         }
+        List<String> allowed = contextFreeAllowedValues();
+        // REST cascading without parent context has no static allow-list (same as pre-fix empty allowedValues).
+        if (allowed == null) {
+            allowed = List.of();
+        }
         try {
-            SelectionCodec.selectedFrom(((StringParameterValue) value).getValue(), allowedValues(), isMulti());
+            SelectionCodec.selectedFrom(((StringParameterValue) value).getValue(), allowed, isMulti());
             return true;
         } catch (IllegalArgumentException e) {
             return false;

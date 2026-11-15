@@ -95,6 +95,7 @@ Keep the URL single-quoted so Groovy does not expand the placeholder. Replace th
 - The controller validates actual submitted parents again. A value from another environment cannot be submitted under the current parent.
 - The first browser load can apply valid defaults; subsequent parent changes require re-selection. API requests omitting the child calculate defaults from the submitted parent context.
 - Context-free dependent defaults are empty, including the first noninteractive Pipeline run. Register parameters first, then submit values via build page/API/CLI. CLI users should explicitly pass both parent and child values.
+- Pipeline `build(parameters: [string(name: 'CHILD', value: '…'), string(name: 'PARENT', value: '…')])` works for `dependentOptions` / static `dependsOn` children: values are checked against the union of configured child options (form/API/CLI still revalidate against the actual parent). REST-only cascades still require form/API/CLI parent context.
 
 ## Configuration
 
